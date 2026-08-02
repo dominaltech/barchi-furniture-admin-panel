@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products - Barchi Furniture Admin</title>
+  <meta name="description" content="Product Inventory & Catalog Management for Barchi Furniture.">
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Admin Application CSS -->
+  <link rel="stylesheet" href="admin.css">
+
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- PWA Manifest & Theme Color -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+
+  <!-- ADMIN HEADER -->
+  <header class="admin-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px;"><img src="barchi-logo.png" alt="Barchi Logo" style="width:44px; height:44px; object-fit:contain; border-radius:8px;"><div><h1 class="brand-title" style="font-family: 'Outfit', sans-serif; letter-spacing: 0.05em; font-size: 1.4rem;">BARCHI <span style="color: var(--accent-primary);">FURNITURE</span></h1>
+          <p class="brand-subtitle" style="margin:0;">LUXURY LIVING ADMIN CONTROL PANEL</p></div></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ADMIN NAVIGATION TABS -->
+  <nav class="admin-nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="admin-nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <span class="nav-text-desktop">Dashboard</span>
+        <span class="nav-text-mobile">Dash</span>
+      </a>
+      <a href="categories.html" class="admin-nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-text-desktop">Categories</span>
+        <span class="nav-text-mobile">Cate</span>
+      </a>
+      <a href="orders.html" class="admin-nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        <span class="nav-text-desktop">Orders</span>
+        <span class="nav-text-mobile">Ordr</span>
+      </a>
+      <a href="add-products.html" class="admin-nav-btn active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span class="nav-text-desktop">Add Products</span>
+        <span class="nav-text-mobile">Prods</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="admin-main">
+    <div class="admin-card">
+      <!-- Toolbar Header: Search Bar, Category Filter, and Add Product Button -->
+      <div class="toolbar-row">
+        <div class="toolbar-search-filter">
+          <div class="search-input-box">
+            <svg class="search-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="productSearchInput" placeholder="Search products by name or details..." oninput="window.AdminApp && window.AdminApp.handleProductSearchFilter()" />
+          </div>
+
+          <select id="productCategoryFilter" class="filter-select" onchange="window.AdminApp && window.AdminApp.handleProductSearchFilter()">
+            <option value="ALL">All Categories</option>
+            <!-- Dynamically populated with category options -->
+          </select>
+        </div>
+
+        <div>
+          <a href="create-product.html" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add New Product
+          </a>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="cards-grid" id="categoryProductsGrid" style="margin-top: 16px;">
+        <!-- Dynamically populated products with SVG Edit & Delete buttons -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Load Admin Application Logic -->
+  <script src="admin.js"></script>
+
+</body>
+</html>

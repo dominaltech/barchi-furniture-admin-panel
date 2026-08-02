@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders - Barchi Furniture Admin</title>
+  <meta name="description" content="Manage Arrived Customer Orders for Barchi Furniture.">
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Admin Application CSS -->
+  <link rel="stylesheet" href="admin.css">
+
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- PWA Manifest & Theme Color -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+
+  <!-- ADMIN HEADER -->
+  <header class="admin-header">
+    <div class="header-container">
+      <div class="brand-wrapper" style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:12px;">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px;"><img src="barchi-logo.png" alt="Barchi Logo" style="width:44px; height:44px; object-fit:contain; border-radius:8px;"><div><h1 class="brand-title" style="font-family: 'Outfit', sans-serif; letter-spacing: 0.05em; font-size: 1.4rem;">BARCHI <span style="color: var(--accent-primary);">FURNITURE</span></h1>
+          <p class="brand-subtitle" style="margin:0;">LUXURY LIVING ADMIN CONTROL PANEL</p></div></div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button id="pushSubscribeBtn" onclick="togglePushSubscription()" style="background:var(--accent-primary, #2563eb); color:#ffffff; font-weight:700; border:none; padding:8px 16px; border-radius:20px; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s;">
+            Enable Notifications
+          </button>
+          <button id="testPushBtn" onclick="sendTestPush()" style="background:#f1f5f9; color:#334155; font-weight:600; border:1px solid #cbd5e1; padding:8px 14px; border-radius:20px; font-size:0.82rem; cursor:pointer;">
+            Test Push
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ADMIN NAVIGATION TABS -->
+  <nav class="admin-nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="admin-nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <span class="nav-text-desktop">Dashboard</span>
+        <span class="nav-text-mobile">Dash</span>
+      </a>
+      <a href="categories.html" class="admin-nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-text-desktop">Categories</span>
+        <span class="nav-text-mobile">Cate</span>
+      </a>
+      <a href="orders.html" class="admin-nav-btn active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        <span class="nav-text-desktop">Orders</span>
+        <span class="nav-text-mobile">Ordr</span>
+      </a>
+      <a href="add-products.html" class="admin-nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span class="nav-text-desktop">Add Products</span>
+        <span class="nav-text-mobile">Prods</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="admin-main">
+    <!-- ORDERS PAGE CONTENT -->
+    <div id="tab-orders" class="tab-pane active" style="display: block;">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h2 class="admin-card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            Arrived Customer Orders
+          </h2>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Manage order statuses from Pending to Confirmed</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Client Name</th>
+                <th>Mobile Number</th>
+                <th>Total Amount</th>
+                <th>Status Switcher</th>
+                <th>Date</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <!-- Dynamically populated orders -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ADMIN PRODUCT DETAILS POPUP MODAL -->
+  <div id="adminOrderModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.65); backdrop-filter:blur(6px); z-index:99999; align-items:center; justify-content:center; padding:16px;">
+    <div class="modal-card" style="background:#ffffff; border-radius:16px; max-width:620px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); border:1px solid #e2e8f0;">
+      <div style="padding:18px 24px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-top-left-radius:16px; border-top-right-radius:16px;">
+        <div>
+          <h3 id="modalOrderId" style="font-family:'Outfit', sans-serif; font-size:1.2rem; color:#0f172a; margin:0;">Product Details - Order #ORD-1001</h3>
+          <span id="modalOrderDate" style="font-size:0.8rem; color:#64748b;">Placed on Date</span>
+        </div>
+        <button onclick="AdminApp.closeOrderDetailsModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:1.2rem; color:#64748b; display:flex; align-items:center; justify-content:center;">&times;</button>
+      </div>
+
+      <div style="padding:20px 24px;">
+        <h4 style="font-family:'Outfit', sans-serif; font-size:1rem; color:#0f172a; margin:0 0 14px 0; display:flex; align-items:center; gap:8px;">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#2563eb"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          Ordered Product Details
+        </h4>
+
+        <!-- DYNAMIC PRODUCT DETAILS CARDS -->
+        <div id="modalProductList" style="display:flex; flex-direction:column; gap:14px; margin-bottom:20px;">
+          <!-- Dynamically populated product cards -->
+        </div>
+
+        <!-- CUSTOMER & DELIVERY INFO AT BOTTOM -->
+        <div style="background:#f8fafc; border-radius:12px; padding:14px 16px; border:1px solid #e2e8f0; font-size:0.85rem; color:#334155;">
+          <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#94a3b8; margin-bottom:6px;">Customer & Delivery Info</div>
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <div>Customer: <strong id="modalClientName" style="color:#0f172a;">Name</strong> (<span id="modalClientPhone">Phone</span>)</div>
+            <div>Status: <span id="modalOrderStatus"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Admin Application Logic -->
+  <script src="admin.js"></script>
+
+  <!-- Ehsan-Architecture Standalone Push Notification Engine -->
+  <script>
+    const VAPID_PUBLIC_KEY = 'BLRlIrTI65YeYRK_UbJyEbtYpz6b6zLFs5NNG9-VzFT3CYQ2D_hmm8RQ0qf9UsTBEfXjNnw2FSqkaZnI7IX6wuM';
+
+    function urlB64ToUint8(b64) {
+      const pad = '='.repeat((4 - b64.length % 4) % 4);
+      const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+      return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+    }
+
+    let swReg = null;
+    let pushSub = null;
+
+    async function getActiveSWRegistration() {
+      if (!('serviceWorker' in navigator)) return null;
+      try {
+        await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        const reg = await navigator.serviceWorker.ready;
+        return reg;
+      } catch (e) {
+        console.error('ServiceWorker registration error:', e);
+        return null;
+      }
+    }
+
+    async function registerSW() {
+      swReg = await getActiveSWRegistration();
+      if (!swReg) {
+        updatePushUI('error');
+        return;
+      }
+      await checkPushState();
+    }
+
+    async function checkPushState() {
+      if (!('PushManager' in window)) { updatePushUI('unsupported'); return; }
+      if (Notification.permission === 'denied') { updatePushUI('denied'); return; }
+      if (!swReg) swReg = await getActiveSWRegistration();
+      if (!swReg) { updatePushUI('idle'); return; }
+
+      try {
+        pushSub = await swReg.pushManager.getSubscription();
+      } catch (e) {
+        pushSub = null;
+      }
+      updatePushUI(pushSub ? 'subscribed' : 'idle');
+    }
+
+    async function togglePushSubscription() {
+      swReg = await getActiveSWRegistration();
+      if (!swReg) {
+        alert('Service Worker is initializing. Please try again in 2 seconds.');
+        return;
+      }
+
+      if (pushSub) {
+        try {
+          await pushSub.unsubscribe();
+        } catch(e) {}
+        pushSub = null;
+        localStorage.removeItem('barchi_push_sub');
+        updatePushUI('idle');
+        alert('Notifications disabled.');
+        return;
+      }
+
+      let perm = Notification.permission;
+      if (perm !== 'granted') {
+        perm = await Notification.requestPermission();
+      }
+
+      if (perm !== 'granted') {
+        updatePushUI('denied');
+        alert('Notification permission was denied. Enable notifications in Chrome settings.');
+        return;
+      }
+
+      try {
+        pushSub = await swReg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlB64ToUint8(VAPID_PUBLIC_KEY)
+        });
+        const subJSON = pushSub.toJSON();
+        localStorage.setItem('barchi_push_sub', JSON.stringify(subJSON));
+
+        try {
+          await fetch('/api/save-subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription: subJSON })
+          });
+        } catch (e) {}
+
+        if (window._supabaseClient) {
+          try {
+            await window._supabaseClient.from('push_subscriptions').delete().gte('id', 0);
+            await window._supabaseClient.from('push_subscriptions').insert({
+              endpoint: subJSON.endpoint,
+              p256dh: subJSON.keys.p256dh,
+              auth: subJSON.keys.auth,
+              updated_at: new Date().toISOString()
+            });
+          } catch(e) {}
+        }
+
+        updatePushUI('subscribed');
+        alert('🔔 Notifications Active! You will receive order alerts on your device even when closed.');
+      } catch (err) {
+        console.error('Subscribe error:', err);
+        alert('Subscribe failed: ' + err.message);
+        updatePushUI('idle');
+      }
+    }
+
+    function getSubJSON() {
+      if (pushSub) return (typeof pushSub.toJSON === 'function') ? pushSub.toJSON() : pushSub;
+      const s = localStorage.getItem('barchi_push_sub');
+      return s ? JSON.parse(s) : null;
+    }
+
+    async function sendTestPush() {
+      const sub = getSubJSON();
+      if (!sub) {
+        alert('Please click "Enable Notifications" first!');
+        return;
+      }
+
+      if (!sub?.keys?.p256dh || !sub?.keys?.auth) {
+        alert('Subscription keys missing — please click "Enable Notifications" again.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/send-push', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subscription: sub,
+            title: '🛒 Barchi Admin — Test Push',
+            message: 'Push notifications are ACTIVE! You will be notified on new orders.',
+            url: '/orders.html'
+          })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          alert('✅ Test push notification sent! Check your notification center.');
+        } else {
+          const errMsg = data.detail || data.error || 'Server error';
+          alert('❌ Push result: ' + errMsg);
+        }
+      } catch (err) {
+        alert('❌ Error: ' + err.message);
+      }
+    }
+
+    function updatePushUI(state) {
+      const btn = document.getElementById('pushSubscribeBtn');
+      if (!btn) return;
+
+      if (state === 'subscribed') {
+        btn.style.background = '#10b981';
+        btn.style.color = '#ffffff';
+        btn.innerHTML = `Notifications Active 🟢`;
+      } else if (state === 'denied') {
+        btn.style.background = '#ef4444';
+        btn.style.color = '#ffffff';
+        btn.innerHTML = `Notifications Blocked`;
+      } else if (state === 'unsupported') {
+        btn.style.background = '#94a3b8';
+        btn.style.color = '#ffffff';
+        btn.innerHTML = `Not Supported`;
+        btn.disabled = true;
+      } else {
+        btn.style.background = 'var(--accent-primary, #2563eb)';
+        btn.style.color = '#ffffff';
+        btn.innerHTML = `Enable Notifications`;
+      }
+    }
+
+    window.addEventListener('load', registerSW);
+  </script>
+
+</body>
+</html>

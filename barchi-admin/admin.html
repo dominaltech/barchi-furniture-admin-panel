@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Barchi Furniture Admin</title>
+  <meta name="description" content="Admin Dashboard for Barchi Furniture.">
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Admin Application CSS -->
+  <link rel="stylesheet" href="admin.css">
+
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- PWA Manifest & Theme Color -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+
+  <!-- ADMIN HEADER -->
+  <header class="admin-header">
+    <div class="header-container">
+      <div class="brand-wrapper" style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:12px;">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px;"><img src="barchi-logo.png" alt="Barchi Logo" style="width:44px; height:44px; object-fit:contain; border-radius:8px;"><div><h1 class="brand-title" style="font-family: 'Outfit', sans-serif; letter-spacing: 0.05em; font-size: 1.4rem;">BARCHI <span style="color: var(--accent-primary);">FURNITURE</span></h1>
+          <p class="brand-subtitle" style="margin:0;">LUXURY LIVING ADMIN CONTROL PANEL</p></div></div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button id="pushSubscribeBtn" onclick="togglePushSubscription()" style="background:var(--accent-primary, #2563eb); color:#ffffff; font-weight:700; border:none; padding:8px 16px; border-radius:20px; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s;">
+            Enable Notifications
+          </button>
+          <button id="testPushBtn" onclick="sendTestPush()" style="background:#f1f5f9; color:#334155; font-weight:600; border:1px solid #cbd5e1; padding:8px 14px; border-radius:20px; font-size:0.82rem; cursor:pointer;">
+            Test Push
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ADMIN NAVIGATION TABS -->
+  <nav class="admin-nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="admin-nav-btn active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <span class="nav-text-desktop">Dashboard</span>
+        <span class="nav-text-mobile">Dash</span>
+      </a>
+      <a href="categories.html" class="admin-nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-text-desktop">Categories</span>
+        <span class="nav-text-mobile">Cate</span>
+      </a>
+      <a href="orders.html" class="admin-nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        <span class="nav-text-desktop">Orders</span>
+        <span class="nav-text-mobile">Ordr</span>
+      </a>
+      <a href="add-products.html" class="admin-nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span class="nav-text-desktop">Add Products</span>
+        <span class="nav-text-mobile">Prods</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="admin-main">
+    <!-- DASHBOARD PAGE CONTENT -->
+    <div id="tab-deshboard" class="tab-pane active" style="display: block;">
+      <!-- Stat Metrics Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon icon-blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Orders</span>
+            <span class="stat-value" id="statTotalOrders">0</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon icon-green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Revenue</span>
+            <span class="stat-value" id="statTotalRevenue">₹0</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon icon-purple">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Products</span>
+            <span class="stat-value" id="statTotalProducts">0</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon icon-cyan">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Categories</span>
+            <span class="stat-value" id="statTotalCategories">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month-wise Revenue Graph Card -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h2 class="admin-card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Month-Wise Revenue Analytics
+          </h2>
+          <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Yearly Sales Breakdown</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="revenueChartCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Load Admin Application Logic -->
+  <script src="admin.js"></script>
+
+  <!-- Ehsan-Architecture Standalone Push Notification Engine -->
+  <script>
+    const VAPID_PUBLIC_KEY = 'BLRlIrTI65YeYRK_UbJyEbtYpz6b6zLFs5NNG9-VzFT3CYQ2D_hmm8RQ0qf9UsTBEfXjNnw2FSqkaZnI7IX6wuM';
+
+    function urlB64ToUint8(b64) {
+      const pad = '='.repeat((4 - b64.length % 4) % 4);
+      const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+      return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+    }
+
+    let swReg = null;
+    let pushSub = null;
+
+    async function getActiveSWRegistration() {
+      if (!('serviceWorker' in navigator)) return null;
+      try {
+        await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        const reg = await navigator.serviceWorker.ready;
+        return reg;
+      } catch (e) {
+        console.error('ServiceWorker registration error:', e);
+        return null;
+      }
+    }
+
+    async function registerSW() {
+      swReg = await getActiveSWRegistration();
+      if (!swReg) {
+        updatePushUI('error');
+        return;
+      }
+      await checkPushState();
+    }
+
+    async function checkPushState() {
+      if (!('PushManager' in window)) { updatePushUI('unsupported'); return; }
+      if (Notification.permission === 'denied') { updatePushUI('denied'); return; }
+      if (!swReg) swReg = await getActiveSWRegistration();
+      if (!swReg) { updatePushUI('idle'); return; }
+
+      try {
+        pushSub = await swReg.pushManager.getSubscription();
+      } catch (e) {
+        pushSub = null;
+      }
+      updatePushUI(pushSub ? 'subscribed' : 'idle');
+    }
+
+    async function togglePushSubscription() {
+      swReg = await getActiveSWRegistration();
+      if (!swReg) {
+        alert('Service Worker is initializing. Please try again in 2 seconds.');
+        return;
+      }
+
+      if (pushSub) {
+        try {
+          await pushSub.unsubscribe();
+        } catch(e) {}
+        pushSub = null;
+        localStorage.removeItem('barchi_push_sub');
+        updatePushUI('idle');
+        alert('Notifications disabled.');
+        return;
+      }
+
+      let perm = Notification.permission;
+      if (perm !== 'granted') {
+        perm = await Notification.requestPermission();
+      }
+
+      if (perm !== 'granted') {
+        updatePushUI('denied');
+        alert('Notification permission was denied. Enable notifications in Chrome settings.');
+        return;
+      }
+
+      try {
+        pushSub = await swReg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlB64ToUint8(VAPID_PUBLIC_KEY)
+        });
+        const subJSON = pushSub.toJSON();
+        localStorage.setItem('barchi_push_sub', JSON.stringify(subJSON));
+
+        try {
+          await fetch('/api/save-subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription: subJSON })
+          });
+        } catch (e) {}
+
+        if (window._supabaseClient) {
+          try {
+            await window._supabaseClient.from('push_subscriptions').delete().gte('id', 0);
+            await window._supabaseClient.from('push_subscriptions').insert({
+              endpoint: subJSON.endpoint,
+              p256dh: subJSON.keys.p256dh,
+              auth: subJSON.keys.auth,
+              updated_at: new Date().toISOString()
+            });
+          } catch(e) {}
+        }
+
+        updatePushUI('subscribed');
+        alert('🔔 Notifications Active! You will receive order alerts on your device even when closed.');
+      } catch (err) {
+        console.error('Subscribe error:', err);
+        alert('Subscribe failed: ' + err.message);
+        updatePushUI('idle');
+      }
+    }
+
+    function getSubJSON() {
+      if (pushSub) return (typeof pushSub.toJSON === 'function') ? pushSub.toJSON() : pushSub;
+      const s = localStorage.getItem('barchi_push_sub');
+      return s ? JSON.parse(s) : null;
+    }
+
+    async function sendTestPush() {
+      const sub = getSubJSON();
+      if (!sub) {
+        alert('Please click "Enable Notifications" first!');
+        return;
+      }
+
+      if (!sub?.keys?.p256dh || !sub?.keys?.auth) {
+        alert('Subscription keys missing — please click "Enable Notifications" again.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/send-push', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subscription: sub,
+            title: '🛒 Barchi Admin — Test Push',
+            message: 'Push notifications are ACTIVE! You will be notified on new orders.',
+            url: '/orders.html'
+          })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          alert('✅ Test push notification sent! Check your notification center.');
+        } else {
+          const errMsg = data.detail || data.error || 'Server error';
+          alert('❌ Push result: ' + errMsg);
+        }
+      } catch (err) {
+        alert('❌ Error: ' + err.message);
+      }
+    }
+
+    function updatePushUI(state) {
+      const btn = document.getElementById('pushSubscribeBtn');
+      if (!btn) return;
+
+      if (state === 'subscribed') {
+        btn.style.background = '#10b981';
+        btn.style.color = '#ffffff';
+        btn.innerHTML = `Notifications Active 🟢`;
+      } else if (state === 'denied') {
+        btn.style.background = '#ef4444';
+        btn.style.color = '#ffffff';
+        btn.innerHTML = `Notifications Blocked`;
+      } else if (state === 'unsupported') {
+        btn.style.background = '#94a3b8';
+        btn.style.color = '#ffffff';
+        btn.innerHTML = `Not Supported`;
+        btn.disabled = true;
+      } else {
+        btn.style.background = 'var(--accent-primary, #2563eb)';
+        btn.style.color = '#ffffff';
+        btn.innerHTML = `Enable Notifications`;
+      }
+    }
+
+    window.addEventListener('load', registerSW);
+  </script>
+
+</body>
+</html>
